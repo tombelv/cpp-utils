@@ -13,9 +13,10 @@ Eigen::Vector2d v = {2., 1.5};
 double s = 3.14;
      
 utils::Logger logger(realpath("data/", nullptr)); // Insert local path where to create files (must have been created prior to this)
-logger.add(m, "mymatrix.csv");
-logger.add(v, "myvector.csv", true);
-logger.add(s, "myscalar.csv");
+logger.appendSuffix("toappend"); //
+logger.add(m, "mymatrix");
+logger.add(v, "myvector", true);
+logger.add(s, "myscalar");
 
 logger.logAll();
 

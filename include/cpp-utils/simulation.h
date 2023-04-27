@@ -41,18 +41,24 @@ namespace utils {
         virtual ~ContainerBase() = default;
     protected:
         std::ofstream file;
-        void createFile(const std::string & dir, const std::string & name){
-          std::cout << "created LOG in " << dir << "/" << name << std::endl;
-          file = std::ofstream(dir + "/" +  name, std::ofstream::out);
+        //std::string name;
+        void createFile(const std::string & dir, const std::string & name, const std::string & suffix){
+          std::cout << "created LOG in " << dir << "/" << name  << suffix << ".csv" << std::endl;
+          file = std::ofstream(dir + "/" +  name + suffix + ".csv", std::ofstream::out);
         }
+
     };
 
     template <typename Derived>
     class EigenContainer : public ContainerBase {
     public:
-        EigenContainer(const Eigen::DenseBase<Derived> & var_to_be_logged, const std::string & dir, const std::string & name, const bool transpose):
-            var_ptr(var_to_be_logged), transpose(transpose) {
-          createFile(dir, name);
+        EigenContainer(const Eigen::DenseBase<Derived> & var_to_be_logged,
+                       const std::string & dir,
+                       const std::string & name,
+                       const std::string & suffix,
+                       const bool transpose):
+            var_ptr(var_to_be_logged), transpose(transpose){
+          createFile(dir, name, suffix);
         }
         ~EigenContainer() { file.close();}
 
@@ -69,9 +75,12 @@ namespace utils {
     template <typename Derived>
     class ScalarContainer : public ContainerBase {
     public:
-        ScalarContainer(const Derived & var_to_be_logged, const std::string & dir, const std::string & name):
+        ScalarContainer(const Derived & var_to_be_logged,
+                        const std::string & dir,
+                        const std::string & name,
+                        const std::string & suffix):
             var_ptr(var_to_be_logged) {
-          createFile(dir, name);
+          createFile(dir, name, suffix);
         }
         ~ScalarContainer() {file.close();}
 
@@ -88,24 +97,28 @@ namespace utils {
 
         Logger() : loggingDirectory(realpath("./", nullptr)) {}
         Logger(const std::string_view & loggingDir) : loggingDirectory(loggingDir) {}
+
+        void appendSuffix(const std::string & suff) {
+          suffix = "_" + suff;
+        }
         
         /// Initializer for Eigen types containers with no transpose() applied
         template <typename Derived>
         void add(const Eigen::DenseBase<Derived> & var_to_be_logged, const std::string & name) {
-          auto container_ptr = std::make_shared<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, false);
+          auto container_ptr = std::make_shared<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix, false);
           list.push_back(container_ptr);
         }
         /// Initializer for Eigen types containers with explicit choice of transpose()
         template <typename Derived>
         void add(const Eigen::DenseBase<Derived> & var_to_be_logged, const std::string & name, const bool transpose) {
-          auto container_ptr = std::make_shared<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, transpose);
+          auto container_ptr = std::make_shared<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix, transpose);
           list.push_back(container_ptr);
         }
 
         /// Initializer for generic scalar types
         template <typename Derived>
         void add(const Derived & var_to_be_logged, const std::string & name) {
-          auto container_ptr = std::make_shared<ScalarContainer<Derived>>(var_to_be_logged, loggingDirectory, name);
+          auto container_ptr = std::make_shared<ScalarContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix);
           list.push_back(container_ptr);
         }
 
@@ -117,6 +130,7 @@ namespace utils {
         // Contains all the different type containers
         std::vector<std::shared_ptr<ContainerBase>> list;
         const std::string loggingDirectory;
+        std::string suffix;
     };
 
 
