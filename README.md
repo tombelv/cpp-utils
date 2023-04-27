@@ -3,7 +3,7 @@ Collection of helper functions for simulations, mathematical operations using Ei
 ## Logger
 This is a `Logger` class used to collect a list of variables to log into csv files.
 ### Example
-```
+```cpp
 #include <cpp-utils/simulation.h>
 
 Eigen::MatrixXd m(2,3);
