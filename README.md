@@ -9,18 +9,13 @@ This is a `Logger` class used to collect a list of variables to log into csv fil
 Eigen::MatrixXd m(2,3);
 m << 1, 2, 3,
      4, 5, 6;
-     
-     
 Eigen::Vector2d v = {2., 1.5};
-
 double s = 3.14;
      
 utils::Logger logger(realpath("data/", nullptr)); // Insert local path where to create files (must have been created prior to this)
-
 logger.add(m, "mymatrix.csv");
 logger.add(v, "myvector.csv", true);
 logger.add(s, "myscalar.csv");
-
 
 logger.logAll();
 
