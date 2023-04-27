@@ -7,7 +7,7 @@ This is a `Logger` class used to collect a list of variables to log into csv fil
 #include <cpp-utils/simulation.h>
 
 Eigen::MatrixXd m(2,3);
-m << 1, 2, 3
+m << 1, 2, 3,
      4, 5, 6;
      
      
