@@ -12,15 +12,17 @@ m << 1, 2, 3,
 Eigen::Vector2d v = {2., 1.5};
 double s = 3.14;
      
-utils::Logger logger(realpath("data/", nullptr)); // Insert local path where to create files (must have been created prior to this)
-logger.appendSuffix("toappend"); //
+utils::Logger logger(realpath("data/", nullptr)); // Insert local path where to create files
+                                                  // (must have been created prior to this)
+                                                  
+logger.appendSuffix("toappend");                  // String to append at the end: <FILENAME>_suffix.csv
 logger.add(m, "mymatrix");
-logger.add(v, "myvector", true);
+logger.add(v, "myvector", true);                  // Transpose the vector (default is false)
 logger.add(s, "myscalar");
 
 logger.logAll();
 
 v(0) = 5;
 
-logger.logAll();
+logger.logAll();                                  // All the variables are logged again, v(0) is changed
 ```
