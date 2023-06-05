@@ -6,6 +6,7 @@
 #include <chrono>
 #include <memory>
 #include <iostream>
+#include <filesystem>
 
 namespace utils {
 
@@ -96,7 +97,10 @@ namespace utils {
     public:
 
         Logger() : loggingDirectory(realpath("./", nullptr)) {}
-        Logger(const std::string_view & loggingDir) : loggingDirectory(loggingDir) {}
+        Logger(const std::string & loggingDir) : loggingDirectory(std::filesystem::absolute(loggingDir)) {
+          if(std::filesystem::create_directory(loggingDirectory))
+            std::cout << "created LOGGING directory " << loggingDirectory << std::endl;
+        }
 
         void appendSuffix(const std::string & suff) {
           suffix = "_" + suff;
