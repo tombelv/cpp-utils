@@ -7,6 +7,7 @@
 #include <memory>
 #include <iostream>
 #include <filesystem>
+#include <map>
 
 namespace utils {
 
@@ -103,36 +104,43 @@ namespace utils {
         }
 
         void appendSuffix(const std::string & suff) {
-          suffix = "_" + suff;
+          if(suff.empty())
+            suffix = "";
+          else suffix = "_" + suff;
         }
+        std::string getSuffix() const {return suffix;}
         
         /// Initializer for Eigen types containers with no transpose() applied
         template <typename Derived>
         void add(const Eigen::DenseBase<Derived> & var_to_be_logged, const std::string & name) {
           auto container_ptr = std::make_shared<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix, false);
-          list.push_back(container_ptr);
+          list[name] = container_ptr;
         }
         /// Initializer for Eigen types containers with explicit choice of transpose()
         template <typename Derived>
         void add(const Eigen::DenseBase<Derived> & var_to_be_logged, const std::string & name, const bool transpose) {
           auto container_ptr = std::make_shared<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix, transpose);
-          list.push_back(container_ptr);
+          list[name] = container_ptr;
         }
 
         /// Initializer for generic scalar types
         template <typename Derived>
         void add(const Derived & var_to_be_logged, const std::string & name) {
           auto container_ptr = std::make_shared<ScalarContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix);
-          list.push_back(container_ptr);
+          list[name] = container_ptr;
         }
 
         /// Log all variables from the list
         void logAll() {
-          for(auto & logger: list) logger->log();
+          for(auto & [name, logger]: list) logger->log();
+        }
+        /// Log variable by the specified name
+        void log(const std::string & name) {
+          list[name]->log();
         }
     private:
         // Contains all the different type containers
-        std::vector<std::shared_ptr<ContainerBase>> list;
+        std::map<std::string, std::shared_ptr<ContainerBase>> list;
         const std::string loggingDirectory;
         std::string suffix;
     };
