@@ -103,46 +103,48 @@ namespace utils {
             std::cout << "created LOGGING directory " << loggingDirectory << std::endl;
         }
 
+        void setLoggingDirectory(const std::string & loggingDir) {
+          loggingDirectory = std::filesystem::absolute(loggingDir);
+          if(std::filesystem::create_directory(loggingDirectory))
+            std::cout << "created LOGGING directory " << loggingDirectory << std::endl;
+        }
+
         void appendSuffix(const std::string & suff) {
-          if(suff.empty())
-            suffix = "";
-          else suffix = "_" + suff;
+          if(!suff.empty()) suffix = "_" + suff;
         }
         std::string getSuffix() const {return suffix;}
-        
-        /// Initializer for Eigen types containers with no transpose() applied
+
+        /// Initializer for Eigen types containers
         template <typename Derived>
-        void add(const Eigen::DenseBase<Derived> & var_to_be_logged, const std::string & name) {
-          auto container_ptr = std::make_shared<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix, false);
-          list[name] = container_ptr;
-        }
-        /// Initializer for Eigen types containers with explicit choice of transpose()
-        template <typename Derived>
-        void add(const Eigen::DenseBase<Derived> & var_to_be_logged, const std::string & name, const bool transpose) {
-          auto container_ptr = std::make_shared<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix, transpose);
-          list[name] = container_ptr;
+        void add(const Eigen::DenseBase<Derived> & var_to_be_logged, const std::string & name, const bool transpose = false, const bool add_to_list = true) {
+          logger_pit[name] = std::make_unique<EigenContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix, transpose);
+          if(add_to_list) list_to_log.push_back(name);
         }
 
         /// Initializer for generic scalar types
         template <typename Derived>
-        void add(const Derived & var_to_be_logged, const std::string & name) {
-          auto container_ptr = std::make_shared<ScalarContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix);
-          list[name] = container_ptr;
+        void add(const Derived & var_to_be_logged, const std::string & name, const bool add_to_list = true) {
+          logger_pit[name] = std::make_unique<ScalarContainer<Derived>>(var_to_be_logged, loggingDirectory, name, suffix);
+          if(add_to_list) list_to_log.push_back(name);
         }
 
-        /// Log all variables from the list
+        /// Log all variables from the logger_pit
         void logAll() {
-          for(auto & [name, logger]: list) logger->log();
+          for(auto & [name, var_to_log]: logger_pit) var_to_log->log();
+        }
+        /// Log only variables in the list
+        void logList() {
+          for(std::string var_name: list_to_log) this->log(var_name);
         }
         /// Log variable by the specified name
         void log(const std::string & name) {
-          list[name]->log();
+          logger_pit[name]->log();
         }
     private:
-        // Contains all the different type containers
-        std::map<std::string, std::shared_ptr<ContainerBase>> list;
-        const std::string loggingDirectory;
-        std::string suffix;
+        std::map<std::string, std::unique_ptr<ContainerBase>> logger_pit;
+        std::vector<std::string> list_to_log;
+        std::string loggingDirectory;
+        std::string suffix = "";
     };
 
 
