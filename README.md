@@ -17,11 +17,16 @@ utils::Logger logger("data/");              // Insert local path where to create
 logger.appendSuffix("toappend");            // String to append at the end: <FILENAME>_suffix.csv
 logger.add(m, "mymatrix");
 logger.add(v, "myvector", true);            // Transpose the vector (default is false)
-logger.add(s, "myscalar");
+logger.add(s, "myscalar", false, true);     // Add to the log list (default is true)
 
 logger.logAll();
+
+logger.logList();                           // Only log the variables added to the list
 
 v(0) = 5;
 
 logger.logAll();                            // All the variables are logged again, v(0) is changed
+
+
+logger.log("myvector")                      // Log only one variable
 ```
